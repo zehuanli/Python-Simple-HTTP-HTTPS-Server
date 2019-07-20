@@ -2,9 +2,7 @@
 
 ## Usage
 
-Put web files under `./www/` directory.
-
-`python one.py [username:password]`
+Put web files under `./www/` directory, then `python one.py [username:password]`
 
 ## Features implemented
 
