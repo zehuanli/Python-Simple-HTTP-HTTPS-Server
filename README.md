@@ -2,6 +2,8 @@
 
 ## Usage
 
+Put web files under `./www/` directory.
+
 `python one.py [username:password]`
 
 ## Features implemented
