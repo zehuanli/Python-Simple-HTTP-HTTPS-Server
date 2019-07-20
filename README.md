@@ -1,10 +1,10 @@
 # Python-Simple-HTTP-HTTPS-Server
 
-## Usage
+## Installation
 
 1. Set path to HTTPS certificate chain `certfile` and private key `keyfile` in `one.py`.
 1. Make a `./www/` directory, which will be the web root.
-1. `python one.py [username:password]`
+1. Usage: `python one.py [username:password]`
 
 ## Features implemented
 
