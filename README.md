@@ -1,4 +1,4 @@
-# Python-Simple-HTTP-HTTPS-Server
+# Python Simple HTTP HTTPS Server
 
 ## Installation
 
