@@ -2,7 +2,9 @@
 
 ## Installation
 
-1. Set path to HTTPS certificate chain `certfile` and private key `keyfile` in `one.py`.
+1. Set path to HTTPS certificate chain `certfile` and private key `keyfile` in `one.py`. For example: 
+   *`certfile='/etc/letsencrypt/live/example.com/fullchain.pem'`*
+   *`keyfile='/etc/letsencrypt/live/example.com/privkey.pem'`*
 1. Make a `./www/` directory, which will be the web root.
 
 ## Usage
