@@ -1,5 +1,7 @@
 # Python Simple HTTP HTTPS Server
 
+**Currently only supports Python2, but should be easy to make it work with Python3**
+
 ## Installation
 
 1. Set path to HTTPS certificate chain `certfile` and private key `keyfile` in `one.py`. For example: 
