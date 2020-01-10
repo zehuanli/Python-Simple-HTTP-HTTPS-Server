@@ -28,7 +28,7 @@ optional arguments:
 
 - HTTP and HTTPS in one Python script
 - HTTP disabled by default for better security
-- Options to change HTTP and/or HTTPS ports
+- Options to change source IP, HTTP and/or HTTPS ports
 - Optional basic authentication
 - Remove headers that may contain sensitive information (`Server`, `Last-Modified` etc.)
 - Better(-ish) logging format
