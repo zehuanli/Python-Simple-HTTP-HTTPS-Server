@@ -1,7 +1,13 @@
-import BaseHTTPServer, ssl, os, time, argparse, base64, logging, re
-from SimpleHTTPServer import SimpleHTTPRequestHandler
+import ssl, os, time, argparse, base64, logging, re
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 from threading import Thread
 
+
+# config
+WEB_ROOT_DIR = './www/'
+CERT_LOCATION = '/path/to/fullchain.pem'
+PRIV_KEY_LOCATION = '/path/to/privkey.pem'
+CA_CERT_LOCATION = '/path/to/ca_cert.pem'
 
 # fail2ban: failregex = \[ERROR\] HTTPS? +<HOST>: *\d{1,5} - code \d{3}.*$
 file_formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(scheme)s %(message)s', datefmt='%m/%d/%y %H:%M:%S')
@@ -18,15 +24,16 @@ logger.addHandler(console_handler)
 global key, cmd_args
 key = None
 
-class AuthHandler(SimpleHTTPRequestHandler, object):
+class AuthHandler(SimpleHTTPRequestHandler):
   def send_header(self, keyword, value):
     if keyword not in ['Server', 'Last-Modified']:
-      super(AuthHandler, self).send_header(keyword, value)
+      super().send_header(keyword, value)
 
   def do_GET(self):
     if key == None or self.headers.getheader('Authorization') == 'Basic ' + key:
       SimpleHTTPRequestHandler.do_GET(self)
     else:
+      self.log(True, 'code 401, basic authentication error')
       self.send_response(401)
       self.send_header('WWW-Authenticate', 'Basic realm=\"example.com\"')
       self.send_header('Content-type', 'text/html')
@@ -60,6 +67,7 @@ if __name__ == '__main__':
   parser.add_argument('--https-port', dest='https_port', type=int, help='HTTPS port, default 443', default=443)
   parser.add_argument('-u', '--user', dest='username', help='username for HTTP basic authentication')
   parser.add_argument('-p', '--pass', dest='password', help='password for HTTP basic authentication')
+  parser.add_argument('-c', '--client-auth', dest='client_auth', action='store_true', help='require SSL client certificate authentication')
   cmd_args = parser.parse_args()
   if not re.match(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$', cmd_args.local_ip):
     parser.error('--ip should be a valid IPv4 address.')
@@ -67,16 +75,22 @@ if __name__ == '__main__':
     parser.error('--http-port specified while --http not set enabled.')
   if (cmd_args.username is None) ^ (cmd_args.password is None):
     parser.error('Either --user or --pass missing for HTTP basic authentication.')
-  if cmd_args.username:
+  if cmd_args.username and cmd_args.password:
     key = base64.b64encode(cmd_args.username + ':' + cmd_args.password)
+  if cmd_args.http and cmd_args.client_auth:
+    parser.error('For security reasons, HTTP is not supported when SSL client certification authentication is enabled.')
 
-  server = BaseHTTPServer.HTTPServer
-  handler = AuthHandler
   if cmd_args.http:
-    http_daemon = server((cmd_args.local_ip, cmd_args.http_port), handler)
-  https_daemon = server((cmd_args.local_ip, cmd_args.https_port), handler)
-  https_daemon.socket = ssl.wrap_socket(https_daemon.socket, certfile='/path/to/fullchain.pem', keyfile='/path/to/privkey.pem', server_side=True)
-  os.chdir('www')
+    http_daemon = HTTPServer((cmd_args.local_ip, cmd_args.http_port), AuthHandler)
+  https_daemon = HTTPServer((cmd_args.local_ip, cmd_args.https_port), AuthHandler)
+  ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+  if cmd_args.client_auth:
+    ssl_context.verify_mode = ssl.CERT_REQUIRED
+    ssl_context.load_verify_locations(cafile=CA_CERT_LOCATION)
+  ssl_context.load_cert_chain(certfile=CERT_LOCATION, keyfile=PRIV_KEY_LOCATION)
+  https_daemon.socket = ssl_context.wrap_socket(https_daemon.socket, server_side=True)
+
+  os.chdir(WEB_ROOT_DIR)
   if cmd_args.http:
     http_t = Thread(target=start_server, args=(http_daemon,))
     http_t.daemon = True
