@@ -31,7 +31,7 @@ class AuthHandler(SimpleHTTPRequestHandler):
 
   def do_GET(self):
     if key == None or self.headers.getheader('Authorization') == 'Basic ' + key:
-      SimpleHTTPRequestHandler.do_GET(self)
+      super().do_GET(self)
     else:
       self.log(True, 'code 401, basic authentication error')
       self.send_response(401)
