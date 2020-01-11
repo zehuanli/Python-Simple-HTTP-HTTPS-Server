@@ -1,18 +1,28 @@
 # Python Simple HTTP HTTPS Server
 
-**Currently only supports Python2, but should be easy to make it work with Python3**
+**[Python3 is required](https://pythonclock.org/), but should be easy to make it work with Python2**
 
 ## Installation
+1. Change the following constants in the "config" block in `one.py`:
+    - `WEB_ROOT_DIR`: Web root directory. Make sure that the folder exists and **does not contain any sensitive data that you don't want to share**.
+    - `CERT_LOCATION`: Server certificate chain file.
+    - `PRIV_KEY_LOCATION`: Private key to server certificate.
+    - `CA_CERT_LOCATION`: (optional) CA certificate for client certificate authentication.
 
-1. Set path to HTTPS certificate chain `certfile` and private key `keyfile` in `one.py`. For example: 
-   *`certfile='/etc/letsencrypt/live/example.com/fullchain.pem'`*
-   *`keyfile='/etc/letsencrypt/live/example.com/privkey.pem'`*
-1. Make a `./www/` directory, which will be the web root.
+    For example:
+    ~~~python
+    WEB_ROOT_DIR = './www'
+    CERT_LOCATION = '/etc/letsencrypt/live/example.com/fullchain.pem'
+    PRIV_KEY_LOCATION = '/etc/letsencrypt/live/example.com/privkey.pem'
+    CA_CERT_LOCATION = '/path/to/ca_cert.pem'
+    ~~~
+
+1. Run `one.py` following the usage below.
 
 ## Usage
 ~~~
-python one.py [-h] [--http] [--ip LOCAL_IP] [--http-port HTTP_PORT]
-              [--https-port HTTPS_PORT] [-u USERNAME] [-p PASSWORD]
+python3 one.py [-h] [--http] [--ip LOCAL_IP] [--http-port HTTP_PORT]
+              [--https-port HTTPS_PORT] [-u USERNAME] [-p PASSWORD] [-c]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -26,6 +36,7 @@ optional arguments:
                         username for HTTP basic authentication
   -p PASSWORD, --pass PASSWORD
                         password for HTTP basic authentication
+  -c, --client-auth     require SSL client certificate authentication
 ~~~
 
 ## Features implemented
@@ -33,7 +44,8 @@ optional arguments:
 - HTTP and HTTPS in one Python script
 - HTTP disabled by default for better security
 - Options to change source IP, HTTP and/or HTTPS ports
-- Optional basic authentication
+- Basic authentication
+- Client certificate authentication
 - Remove headers that may contain sensitive information (`Server`, `Last-Modified` etc.)
 - Better(-ish) logging format
 - Store fail2ban-friendly logs stored in `/var/log/one.log`
