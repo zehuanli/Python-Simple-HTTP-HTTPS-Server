@@ -99,5 +99,5 @@ if __name__ == '__main__':
   https_t.daemon = True
   https_t.start()
   logger.info('Server started, listening on ' + cmd_args.local_ip + ' port ' + str(cmd_args.https_port) + ' for HTTPS' + ((' and port ' + str(cmd_args.http_port) + ' for HTTP') if cmd_args.http else ''), extra={'color': 37, 'scheme': 'START'})
-  while True:
-    time.sleep(1)
+  # Keep running
+  https_t.join()
