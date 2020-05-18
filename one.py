@@ -45,7 +45,7 @@ class AuthHandler(SimpleHTTPRequestHandler):
       self.send_response(401)
       self.send_header('WWW-Authenticate', 'Basic realm=\"example.com\"')
       self.send_header('Content-type', 'text/html')
-            self.end_headers()
+      self.end_headers()
 
   def log_request(self, code='-', size='-'):
     self.log(False, '"%s" %s %s', self.requestline, str(code), str(size))
