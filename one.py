@@ -1,5 +1,6 @@
 import ssl, os, time, argparse, base64, logging, re
 from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http import HTTPStatus
 from threading import Thread
 
 
@@ -29,15 +30,22 @@ class AuthHandler(SimpleHTTPRequestHandler):
     if keyword not in ['Server', 'Last-Modified']:
       super().send_header(keyword, value)
 
+  def send_error(self, code, message=None):
+    self.log(True, 'code ' + str(code.value) + ', ' + str(message) + ' - ' + str(self.path))
+    # Error info will be logged above, but never sent out like below
+    # SimpleHTTPRequestHandler.send_error(self, code, message)
+
   def do_GET(self):
-    if key == None or self.headers.getheader('Authorization') == 'Basic ' + key:
-      super().do_GET(self)
+    if self.path == '/':
+      self.send_error(HTTPStatus.FORBIDDEN, 'visiting root path')
+    elif key == None or self.headers['Authorization'] == 'Basic ' + key.decode('utf-8'):
+      SimpleHTTPRequestHandler.do_GET(self)
     else:
-      self.log(True, 'code 401, basic authentication error')
+      self.send_error(HTTPStatus.FORBIDDEN, 'basic authentication error')
       self.send_response(401)
       self.send_header('WWW-Authenticate', 'Basic realm=\"example.com\"')
       self.send_header('Content-type', 'text/html')
-      self.end_headers()
+            self.end_headers()
 
   def log_request(self, code='-', size='-'):
     self.log(False, '"%s" %s %s', self.requestline, str(code), str(size))
@@ -76,7 +84,7 @@ if __name__ == '__main__':
   if (cmd_args.username is None) ^ (cmd_args.password is None):
     parser.error('Either --user or --pass missing for HTTP basic authentication.')
   if cmd_args.username and cmd_args.password:
-    key = base64.b64encode(cmd_args.username + ':' + cmd_args.password)
+    key = base64.b64encode(bytes(cmd_args.username + ':' + cmd_args.password, 'utf-8'))
   if cmd_args.http and cmd_args.client_auth:
     parser.error('For security reasons, HTTP is not supported when SSL client certification authentication is enabled.')
 
