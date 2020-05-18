@@ -47,5 +47,6 @@ optional arguments:
 - Basic authentication
 - Client certificate authentication
 - Remove headers that may contain sensitive information (`Server`, `Last-Modified` etc.)
+- Errors are logged, but never sent out
 - Better(-ish) logging format
 - Store fail2ban-friendly logs stored in `/var/log/one.log`
