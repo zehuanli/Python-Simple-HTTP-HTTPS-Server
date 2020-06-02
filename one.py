@@ -31,12 +31,12 @@ class AuthHandler(SimpleHTTPRequestHandler):
       super().send_header(keyword, value)
 
   def send_error(self, code, message=None):
-    self.log(True, 'code ' + str(code.value) + ', ' + str(message) + ' - ' + str(self.path))
+    self.log(True, '%s', 'code ' + str(code.value) + ', ' + str(message) + ' - ' + str(self.path))
     # Error info will be logged above, but never sent out like below
     # SimpleHTTPRequestHandler.send_error(self, code, message)
 
   def do_GET(self):
-    if self.path == '/':
+    if os.path.relpath(self.path, start='/') == '.':
       self.send_error(HTTPStatus.FORBIDDEN, 'visiting root path')
     elif key == None or self.headers['Authorization'] == 'Basic ' + key.decode('utf-8'):
       SimpleHTTPRequestHandler.do_GET(self)
